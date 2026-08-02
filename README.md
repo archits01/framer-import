@@ -4,8 +4,17 @@ Clone a published Framer site into a static site you actually own, deploy it, an
 change it later by just telling your agent what to do.
 
 <p align="center">
-  <img src="docs/demo.gif" alt="Clone a Framer site and deploy it, from a single prompt" width="760">
+  <img src="docs/demo-poster.png" alt="Framer Import demo" width="760">
 </p>
+
+<!-- DEMO (mp4) — two easy ways to show it:
+  1. Inline player (best): edit this README on github.com and drag your demo.mp4
+     right here. GitHub uploads it and inserts a <video> that plays inline. Then
+     you can delete this poster <img> above.
+  2. Clickable poster: link the poster to your video (X post or hosted mp4):
+       [![Framer Import demo](docs/demo-poster.png)](https://your-video-url)
+     (replace the plain <img> above with that line).
+-->
 
 Runs inside an AI coding agent — Claude Code, Codex, Cursor, Antigravity, Hermes,
 or OpenClaw. You'll need one of those. It's also on

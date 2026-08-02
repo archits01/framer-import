@@ -1,13 +1,20 @@
 # docs/
 
-Drop the demo here.
+The demo lives here.
 
-- Save your Tella export as **`docs/demo.gif`** (or `demo.mp4`) and it shows at the
-  top of the main README automatically — the README already points at
-  `docs/demo.gif`.
-- Good size: ~760px wide, a short loop (10–25s) of: paste a Framer URL → clone →
-  preview → deploy → live URL.
-- GitHub renders animated GIFs inline. For an MP4, replace the `<img>` in the
-  README with a link, since GitHub won't autoplay MP4 in markdown.
+`demo-poster.png` is a placeholder poster shown at the top of the main README.
+When your Tella MP4 is ready, do one of these:
 
-Nothing else in here is required.
+1. **Inline player (best on GitHub).** Edit the main `README.md` on github.com and
+   drag your `demo.mp4` into the editor where the poster `<img>` is. GitHub uploads
+   the file and inserts a `<video>` that plays inline. Delete the poster `<img>`
+   after. (GitHub does not play a repo-relative `.mp4` referenced by path — it only
+   plays videos uploaded through the editor / attachments.)
+
+2. **Clickable poster.** Replace `demo-poster.png` with a nicer still frame if you
+   want, and link it to your video (X post or a hosted MP4):
+   ```markdown
+   [![Framer Import demo](docs/demo-poster.png)](https://your-video-url)
+   ```
+
+Good clip: ~15–40s, paste a Framer URL → clone → preview → deploy → live URL.
