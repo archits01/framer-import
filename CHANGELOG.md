@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.3
+
+- Guarded the output-directory wipe in `clone-framer.mjs`: it now refuses to
+  recursively delete a pre-existing directory it did not create (marker file),
+  unless the dir is empty or `FRAMER_FORCE=1` is set. Prevents a mistaken
+  `OUT_DIR` from destroying files. (ClawHub scanner finding.)
+
 ## 0.5.2
 
 - Fixed a path-traversal bug in the local preview server (`serve.mjs`): request

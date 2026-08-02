@@ -1,7 +1,7 @@
 {
   "id": "framer-import",
   "name": "Framer Import",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "description": "Clone any published Framer site into a self-contained, routed static site you own, then deploy it to Vercel or any static host.",
   "skills": "./skills/",
   "configSchema": {

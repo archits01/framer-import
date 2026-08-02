@@ -68,6 +68,24 @@ const EX = path.resolve('_ex');
 const ORIGIN = new URL(SITE_URL).origin;
 const SHARED = ['assets', 'scripts', 'styles', 'data'];
 
+// Safety: the stitch step wipes OUT to rebuild it. Only ever delete a dir this
+// tool created (marked) or that is empty — refuse to destroy a pre-existing dir
+// we don't own, so a mistaken OUT_DIR can't nuke someone's files. Checked up
+// front (before any export work). Override with FRAMER_FORCE=1.
+const OUT_MARKER = path.join(OUT, '.framer-import');
+if (
+  fs.existsSync(OUT) &&
+  !fs.existsSync(OUT_MARKER) &&
+  fs.readdirSync(OUT).length > 0 &&
+  process.env.FRAMER_FORCE !== '1'
+) {
+  console.error(
+    `ERROR: "${OUT}" already exists and was not created by framer-import.\n` +
+      `Refusing to overwrite it. Use a new/empty directory, or set FRAMER_FORCE=1 to override.`
+  );
+  process.exit(1);
+}
+
 // ---- helpers ---------------------------------------------------------------
 
 function runExport(url, outDir) {
@@ -170,8 +188,9 @@ for (const route of routes) {
 // ---- 3. stitch into routed site --------------------------------------------
 
 console.log(`\n[3/5] Stitching into ${OUT}`);
-fs.rmSync(OUT, { recursive: true, force: true });
+fs.rmSync(OUT, { recursive: true, force: true }); // safe: validated up front
 fs.mkdirSync(OUT, { recursive: true });
+fs.writeFileSync(OUT_MARKER, 'created by framer-import\n');
 for (const d of SHARED) fs.mkdirSync(path.join(OUT, d), { recursive: true });
 
 let totalAssets = 0;

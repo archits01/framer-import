@@ -1,5 +1,5 @@
 name: framer-import
-version: "0.5.2"
+version: "0.5.3"
 description: "Clone any published Framer site into a self-contained, routed static site you own, deploy it to Vercel or any static host, and edit it by prompt then re-deploy. Bundles the FramerExport engine + two skills (framer-import: clone/deploy; framer-agent-api: edit via @framer/agent)."
 author: "Archit Sakri"
 kind: standalone
