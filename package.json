@@ -1,0 +1,30 @@
+{
+  "name": "@archits01/framer-import",
+  "version": "0.5.0",
+  "type": "module",
+  "description": "Clone any published Framer site into code you own, deploy it to Vercel or any static host, and edit it by prompt — then re-import and re-deploy.",
+  "license": "MIT",
+  "files": [
+    "index.js",
+    "openclaw.plugin.json",
+    "skills",
+    "vendor",
+    "hooks",
+    "README.md",
+    "LICENSE"
+  ],
+  "peerDependencies": {
+    "openclaw": ">=2026.5.17"
+  },
+  "openclaw": {
+    "extensions": [
+      "./index.js"
+    ],
+    "compat": {
+      "pluginApi": ">=2026.5.17"
+    },
+    "build": {
+      "openclawVersion": "2026.7.1-2"
+    }
+  }
+}

@@ -2,13 +2,15 @@
 
 ## 0.5.0
 
-- **OpenClaw support — free, via existing markers.** OpenClaw reads our
-  `.codex-plugin`/`.claude-plugin`/`.cursor-plugin` manifests as a *compatible
-  bundle* and maps the `skills/` in as native OpenClaw skills — no
-  OpenClaw-specific manifest needed. Confirmed we have no conflicting native
-  marker (no `openclaw.plugin.json`, no root `package.json`) so it detects as a
-  bundle. (Deps: OpenClaw won't auto-`npm install`, so run `hooks/ensure-deps.sh`
-  once; docs updated. Not live-tested — CLI not installed at build time.)
+- **OpenClaw — native plugin, VERIFIED + published on ClawHub.** Added a native
+  OpenClaw plugin: `index.js` (`defineToolPlugin`) exposing `framer_clone` /
+  `framer_deploy` tools that drive the shared scripts + engine, plus
+  `openclaw.plugin.json` + `package.json` (`openclaw.extensions`). Runtime-verified
+  with the OpenClaw CLI (`openclaw plugins install` → `inspect --runtime`:
+  Status loaded, both tools registered). Doesn't affect the other five (Claude
+  validate + Antigravity validate still pass).
+- **Published on ClawHub:** `framer-agent-api@1.0.0` (skill) and
+  `@archits01/framer-import@0.5.0` (code-plugin).
 - **Added Hermes (fifth target, VERIFIED).** Added a root `plugin.yaml` +
   `__init__.py` — Hermes uses a Python `register(ctx)` plugin model but the *same*
   `SKILL.md` skill format, so both skills register unchanged via

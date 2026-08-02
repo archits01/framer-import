@@ -15,10 +15,10 @@ whole loop, driven from plain language.
          └───────────────────  "change X"  ◀────────────────────┘
 ```
 
-Works as a plugin in **Claude Code · Codex · Cursor · Antigravity · Hermes**
-(all five live-verified), and in **OpenClaw** as a compatible bundle (it reuses
-the same markers — no extra manifest). One folder, one shared engine. Then just
-talk to your agent.
+Works as a plugin in **Claude Code · Codex · Cursor · Antigravity · Hermes ·
+OpenClaw** — all six live-verified. One folder, one shared engine. The
+`framer-agent-api` skill and the `@archits01/framer-import` plugin are also
+**published on [ClawHub](https://clawhub.ai)**. Then just talk to your agent.
 
 ---
 
@@ -130,17 +130,22 @@ Adds a `/framer-import` slash command (`clone <url>` / `deploy [dir]` / `help`)
 and registers both skills (load with `skill_view("framer-import:framer-import")`).
 
 ### OpenClaw
-OpenClaw reads our existing Codex/Claude/Cursor manifests as a **compatible
-bundle** — no OpenClaw-specific manifest needed. Both skills map in as native
-OpenClaw skills.
+A **native** OpenClaw plugin (`index.js` + `openclaw.plugin.json`) exposing two
+tools — `framer_clone` and `framer_deploy` — that drive the shared scripts +
+engine. Install from ClawHub or locally:
 ```bash
-openclaw plugins install ./framer-import      # local dir, archive, or git/marketplace source
-openclaw plugins list                          # shows: Format: bundle · Bundle format: codex/claude/cursor
-openclaw gateway restart
+openclaw plugins install clawhub:@archits01/framer-import   # from ClawHub
+# or local:  openclaw plugins install ./framer-import
+openclaw plugins inspect framer-import --runtime            # Status: loaded · Tools: framer_clone, framer_deploy
 ```
-Note: OpenClaw won't auto-install the engine's deps (bundles get no `npm install`
-repair), so run `bash hooks/ensure-deps.sh` once after install. The Claude
-`hooks/hooks.json` is detect-only under OpenClaw.
+Verified: loads in-process, both tools register. The `framer_clone` tool runs
+`ensure-deps.sh` itself, so the engine's deps install on first use.
+
+### ClawHub
+```bash
+clawhub skill install framer-agent-api          # the editing skill (text)
+clawhub package install @archits01/framer-import # the clone/deploy plugin
+```
 
 > **First run installs the engine's dependencies** (a headless-browser download)
 > automatically via the plugin's `SessionStart` hook. To trigger it manually:
@@ -262,6 +267,7 @@ It **verifies by actually rendering** each route in a headless browser (a plain
 framer-import/
 ├── plugin.json                      # Antigravity manifest (root marker)
 ├── plugin.yaml + __init__.py        # Hermes plugin (register skills + /framer-import command)
+├── openclaw.plugin.json + index.js + package.json  # OpenClaw native plugin (framer_clone/framer_deploy tools)
 ├── .claude-plugin/plugin.json       # Claude Code manifest
 ├── .codex-plugin/plugin.json        # Codex manifest (+ interface metadata)
 ├── .cursor-plugin/plugin.json       # Cursor manifest
@@ -279,7 +285,7 @@ framer-import/
 └── LICENSE · CHANGELOG.md · .gitignore
 ```
 
-All five harnesses read the same `skills/<name>/SKILL.md`; the scripts self-locate
+All six harnesses read the same `skills/<name>/SKILL.md`; the scripts self-locate
 the engine, so the exact same code runs everywhere.
 
 ---

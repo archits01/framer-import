@@ -11,3 +11,6 @@ _ex/
 framer-site/
 *-site/
 _ex_master.log
+
+# clawhub/openclaw validation reports (generated)
+reports/
