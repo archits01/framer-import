@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.2
+
+- Fixed a path-traversal bug in the local preview server (`serve.mjs`): request
+  paths are now resolved and boundary-checked against the site root, so a request
+  like `/../../etc/passwd` can’t escape the served folder. (Found by ClawHub’s
+  scanner; the earlier hardening dropped the other flags to notes.)
+
 ## 0.5.1
 
 Security hardening (addresses ClawHub scan findings on the OpenClaw package):

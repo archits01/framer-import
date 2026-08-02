@@ -3,6 +3,9 @@
  * serve.mjs — local static server that mimics Vercel's cleanUrls + 404 fallback,
  * so you can verify the cloned site before deploying.
  *   node serve.mjs [siteDir] [port]      (defaults: ./framer-site, 4000)
+ *
+ * Paths are resolved and boundary-checked against the site root, so a request
+ * like /../../etc/passwd can never escape the served folder.
  */
 import http from 'node:http';
 import fs from 'node:fs';
@@ -22,16 +25,36 @@ const send = (res, file, code = 200) => {
   fs.createReadStream(file).pipe(res);
 };
 
+// Resolve a URL path under ROOT, refusing anything that escapes it.
+// Returns an absolute path inside ROOT, or null if it would traverse out.
+function safePath(urlPath) {
+  const rel = path.posix.normalize('/' + urlPath).replace(/^\/+/, ''); // collapse .., strip leading /
+  const abs = path.resolve(ROOT, rel);
+  if (abs !== ROOT && !abs.startsWith(ROOT + path.sep)) return null; // outside the root
+  return abs;
+}
+const isFile = (p) => p && fs.existsSync(p) && fs.statSync(p).isFile();
+
 http
   .createServer((req, res) => {
-    const url = decodeURIComponent(req.url.split('?')[0]);
-    const fp = path.join(ROOT, url);
-    if (url !== '/' && fs.existsSync(fp) && fs.statSync(fp).isFile()) return send(res, fp);
+    let url;
+    try {
+      url = decodeURIComponent(req.url.split('?')[0]);
+    } catch {
+      res.writeHead(400);
+      return res.end('Bad request');
+    }
+
     if (url === '/') return send(res, path.join(ROOT, 'index.html'));
-    const asHtml = path.join(ROOT, url.replace(/\/$/, '') + '.html'); // cleanUrls
-    if (fs.existsSync(asHtml)) return send(res, asHtml);
+
+    const fp = safePath(url);
+    if (isFile(fp)) return send(res, fp);
+
+    const asHtml = safePath(url.replace(/\/$/, '') + '.html'); // cleanUrls
+    if (isFile(asHtml)) return send(res, asHtml);
+
     const nf = path.join(ROOT, '404.html');
-    if (fs.existsSync(nf)) return send(res, nf, 404);
+    if (isFile(nf)) return send(res, nf, 404);
     res.writeHead(404);
     res.end('Not found');
   })

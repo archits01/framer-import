@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "framer-import",
   "displayName": "Framer Import",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "Clone any published Framer site into a self-contained, routed static site, edit it by prompt, and deploy to Vercel or any static host — then re-import and re-deploy on every change.",
   "author": {
     "name": "Archit Sakri"

@@ -1,6 +1,6 @@
 {
   "name": "@archits01/framer-import",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "type": "module",
   "description": "Clone any published Framer site into code you own, deploy it to Vercel or any static host, and edit it by prompt — then re-import and re-deploy.",
   "license": "MIT",
