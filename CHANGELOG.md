@@ -2,6 +2,13 @@
 
 ## 0.5.0
 
+- **OpenClaw support — free, via existing markers.** OpenClaw reads our
+  `.codex-plugin`/`.claude-plugin`/`.cursor-plugin` manifests as a *compatible
+  bundle* and maps the `skills/` in as native OpenClaw skills — no
+  OpenClaw-specific manifest needed. Confirmed we have no conflicting native
+  marker (no `openclaw.plugin.json`, no root `package.json`) so it detects as a
+  bundle. (Deps: OpenClaw won't auto-`npm install`, so run `hooks/ensure-deps.sh`
+  once; docs updated. Not live-tested — CLI not installed at build time.)
 - **Added Hermes (fifth target, VERIFIED).** Added a root `plugin.yaml` +
   `__init__.py` — Hermes uses a Python `register(ctx)` plugin model but the *same*
   `SKILL.md` skill format, so both skills register unchanged via

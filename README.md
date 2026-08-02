@@ -15,9 +15,10 @@ whole loop, driven from plain language.
          └───────────────────  "change X"  ◀────────────────────┘
 ```
 
-Works as a plugin in **Claude Code · Codex · Cursor · Antigravity · Hermes** —
-all five verified. One folder, five manifests, one shared engine. Then just talk
-to your agent.
+Works as a plugin in **Claude Code · Codex · Cursor · Antigravity · Hermes**
+(all five live-verified), and in **OpenClaw** as a compatible bundle (it reuses
+the same markers — no extra manifest). One folder, one shared engine. Then just
+talk to your agent.
 
 ---
 
@@ -127,6 +128,19 @@ hermes plugins list       # shows: framer-import  enabled
 ```
 Adds a `/framer-import` slash command (`clone <url>` / `deploy [dir]` / `help`)
 and registers both skills (load with `skill_view("framer-import:framer-import")`).
+
+### OpenClaw
+OpenClaw reads our existing Codex/Claude/Cursor manifests as a **compatible
+bundle** — no OpenClaw-specific manifest needed. Both skills map in as native
+OpenClaw skills.
+```bash
+openclaw plugins install ./framer-import      # local dir, archive, or git/marketplace source
+openclaw plugins list                          # shows: Format: bundle · Bundle format: codex/claude/cursor
+openclaw gateway restart
+```
+Note: OpenClaw won't auto-install the engine's deps (bundles get no `npm install`
+repair), so run `bash hooks/ensure-deps.sh` once after install. The Claude
+`hooks/hooks.json` is detect-only under OpenClaw.
 
 > **First run installs the engine's dependencies** (a headless-browser download)
 > automatically via the plugin's `SessionStart` hook. To trigger it manually:
