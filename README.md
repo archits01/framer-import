@@ -1,299 +1,224 @@
 # Framer Import
 
-**Turn any published Framer site into code you own — cloned, deployed, and
-editable by prompt — without touching a dashboard.**
+Clone a published Framer site into a static site you actually own, deploy it, and
+change it later by just telling your agent what to do.
 
-You point it at a Framer URL. It pulls the whole site down into a clean, static,
-self-contained website, checks every page renders, shows you a preview, and ships
-it to Vercel (or any static host). Later you just say *"change the pricing to $29"* —
-it makes the edit in Framer, republishes, re-pulls, and re-deploys. That's the
-whole loop, driven from plain language.
+It runs as a plugin (or skill) in Claude Code, Codex, Cursor, Antigravity, Hermes,
+and OpenClaw, and it's on [ClawHub](https://clawhub.ai) as `@archits01/framer-import`.
 
-```
-  Framer (your design)  ──edit by prompt──▶  import  ──▶  your live site
-         ▲                                                      │
-         └───────────────────  "change X"  ◀────────────────────┘
-```
+## What it does
 
-Works as a plugin in **Claude Code · Codex · Cursor · Antigravity · Hermes ·
-OpenClaw** — all six live-verified. One folder, one shared engine, and
-**published on [ClawHub](https://clawhub.ai)** as `@archits01/framer-import`
-(bundles both skills). Then just talk to your agent.
+You give it a published Framer URL. It downloads the whole site (every page, all
+the images and fonts) into a plain static folder, checks the pages render, and
+deploys it to Vercel or wherever you want. Later, if you want to change something,
+you say so in plain English and it edits the Framer project, republishes, re-pulls,
+and redeploys.
 
----
+None of what you clone stays tied to Framer. The output is just HTML/CSS/JS you
+can host anywhere and keep.
 
-## Why this exists
+## Why
 
-Framer is great for designing, but the moment you want to **own the code**, **host
-it yourself**, **drop the Framer subscription**, or **fold the site into your own
-infra**, you're stuck — Framer doesn't hand you a clean export.
-
-The popular export tools get you *one page*, still wired to Framer's CDN, with no
-routing. Visiting `/pricing` shows the homepage. Framer Import fixes all of that:
-it exports **every route**, localizes **every asset**, wires up **real routing +
-a 404**, and gives you a folder you can deploy anywhere and keep forever.
-
----
+Framer is good for building, but it won't hand you a clean export. The existing
+export tools grab one page, leave the assets pointed at Framer's CDN, and don't
+set up routing, so visiting `/pricing` ends up serving the homepage. This exports
+every route, pulls every asset local, wires up real routing and a custom 404, and
+gives you a folder you can deploy and forget about.
 
 ## Quickstart
 
-Once installed (see [Install](#install)), you don't run scripts — you **talk to
-your agent**:
+You don't run scripts. You tell your agent:
 
-> **You:** import https://my-site.framer.app and deploy it
+> import https://my-site.framer.app and deploy it
 
-That's it. The agent handles the rest and hands you a live URL. Under the hood
-it runs the same three steps you *can* run by hand if you want
-([power-user mode](#power-user--manual-usage)):
+It clones the site, shows you a preview so you can check it looks right, asks
+before it puts anything live, then hands you the URL. If you'd rather run it
+yourself, it's three steps (see [manual usage](#manual-usage)):
 
 ```bash
-# 1. clone every route into a self-contained static site
 SITE_URL=https://my-site.framer.app node .../scripts/clone-framer.mjs ./my-site
-# 2. verify every page renders with zero broken assets
-node .../scripts/serve.mjs ./my-site 4000 &   node .../scripts/verify.mjs http://localhost:4000 ./my-site
-# 3. ship it
+node .../scripts/verify.mjs http://localhost:4000 ./my-site   # after serving it
 bash .../scripts/deploy.sh ./my-site
 ```
 
----
-
-## What the experience feels like
-
-A real run, from your chair:
-
-1. **You:** *"import https://my-site.framer.app and deploy it"*
-2. **Agent:** "On it — I'll clone every page, check it all renders, show you a
-   preview, then deploy. Give me a couple minutes."
-3. *(agent clones all routes, localizes assets, verifies)*
-4. **Agent:** "✅ Cloned all 9 pages — every one renders, zero broken assets.
-   Here's the homepage 👇 [screenshot]. Ready to put it live?"
-5. **You:** *"yep"*
-6. **Agent:** *(if you've never used Vercel)* "Quick one-time login — run
-   `! vercel login` and tell me when you're in." → then deploys.
-7. **Agent:** "🎉 **It's live: https://my-site-xi.vercel.app** — I checked the
-   home, pricing, and 404 in production, all good. Heads up: your *Blog* page
-   still has template filler, and the contact form won't submit until we point it
-   somewhere. Want a custom domain, or to fix either of those?"
-
-No jargon, no terminal walls — just a preview, a link, and honest next steps.
-
----
-
 ## Install
 
-Pick your agent. Each is verified working; the skills and engine are identical
-across all four.
+Grab it:
 
-First, clone it somewhere:
 ```bash
 git clone https://github.com/archits01/framer-import.git
 ```
 
-### Claude Code
-Drop it into `~/.claude/skills/` — it auto-loads as a skills-directory plugin,
-no install step.
+Then wire it into whichever agent you use. The skills and engine are the same
+everywhere; only the manifest each tool reads differs.
+
+**Claude Code** — drop it in `~/.claude/skills/` and it loads on its own:
 ```bash
 git clone https://github.com/archits01/framer-import.git ~/.claude/skills/framer-import
-# restart Claude Code (or /reload-plugins), then:
-claude plugin list        # shows: framer-import@skills-dir  ✔ loaded
+claude plugin list        # framer-import@skills-dir, loaded
 ```
 
-### Codex
-Install straight from GitHub:
+**Codex** — install from GitHub:
 ```bash
 codex plugin marketplace add archits01/framer-import
 codex plugin add framer-import@framer-import-marketplace
-codex plugin list         # shows: installed, enabled
 ```
 
-### Cursor
+**Cursor** — symlink it into the local plugins folder, then reload the window:
 ```bash
 mkdir -p ~/.cursor/plugins/local
 ln -sfn /path/to/framer-import ~/.cursor/plugins/local/framer-import
-# then in Cursor: "Developer: Reload Window"
-# or ad hoc:  cursor-agent --plugin-dir /path/to/framer-import
 ```
 
-### Antigravity
+**Antigravity**:
 ```bash
 agy plugin install /path/to/framer-import
-agy plugin list           # shows: framer-import (skills)
 ```
 
-### Hermes
-Install from GitHub, then enable (plugins are opt-in):
+**Hermes** — installs from GitHub, opt-in so you enable it after:
 ```bash
 hermes plugins install archits01/framer-import --enable
-hermes plugins list       # shows: framer-import  enabled
 ```
-Adds a `/framer-import` slash command (`clone <url>` / `deploy [dir]` / `help`)
-and registers both skills (load with `skill_view("framer-import:framer-import")`).
+Gives you a `/framer-import` command (`clone <url>`, `deploy [dir]`, `help`).
 
-### OpenClaw
-A **native** OpenClaw plugin (`index.js` + `openclaw.plugin.json`) exposing two
-tools — `framer_clone` and `framer_deploy` — that drive the shared scripts +
-engine. Install from ClawHub or locally:
+**OpenClaw / ClawHub** — a native plugin with two tools, `framer_clone` and
+`framer_deploy`:
 ```bash
-openclaw plugins install clawhub:@archits01/framer-import   # from ClawHub
-# or local:  openclaw plugins install ./framer-import
-openclaw plugins inspect framer-import --runtime            # Status: loaded · Tools: framer_clone, framer_deploy
-```
-Verified: loads in-process, both tools register. The `framer_clone` tool runs
-`ensure-deps.sh` itself, so the engine's deps install on first use.
-
-### ClawHub
-```bash
-clawhub package install @archits01/framer-import   # the full plugin (bundles both skills)
+openclaw plugins install clawhub:@archits01/framer-import
 ```
 
-> **First run installs the engine's dependencies** (a headless-browser download)
-> automatically via the plugin's `SessionStart` hook. To trigger it manually:
-> `bash /path/to/framer-import/hooks/ensure-deps.sh`
+First run downloads the engine's dependencies (it uses a headless browser). That
+happens automatically, or you can trigger it with `bash hooks/ensure-deps.sh`.
 
----
+## What you need
 
-## Requirements
+- Node 18+ for cloning and deploying. (Node 24+ only if you also want the
+  edit-by-prompt part.)
+- A Framer site that's actually published. It captures the live URL, so publish
+  before you import.
+- For deploys, the Vercel CLI, but you don't have to install it first; `deploy.sh`
+  handles that and the login. Any static host works too (Netlify, Cloudflare
+  Pages, S3).
 
-- **Node.js 18+** for the clone/deploy engine. *(Node 24+ only if you use the
-  prompt-editing half — see below.)*
-- A **published** Framer site — the live `*.framer.app` or your custom domain.
-  The engine captures what's *published*, so publish before you import.
-- For deploying: the **Vercel CLI** — but you don't need to pre-install it; the
-  bundled `deploy.sh` installs it and walks you through `vercel login` if needed.
-  (Any static host works too — Netlify, Cloudflare Pages, S3.)
-- **No Framer account or setup is needed to clone + deploy.** It's only required
-  for the *editing* half (next section).
+You don't need a Framer account or any setup just to clone and host a site. That's
+only for editing (below).
 
----
+## Editing by prompt
 
-## Editing your site by prompt
+Once it's up, changing it is one sentence:
 
-After it's deployed, changing it is a sentence:
+> change the hero headline to "Ship faster" and redeploy
 
-> **You:** *"change the hero headline to 'Ship faster' and redeploy"*
+It makes the edit on your Framer canvas, publishes, re-clones, and redeploys.
 
-The agent uses the bundled **`framer-agent-api`** skill to make the real edit on
-your Framer canvas, publishes it, re-clones, and re-deploys. The loop:
+The only setup for this half is connecting your agent to Framer once, with
+`npx @framer/agent@latest setup` (needs Node 24+) plus your project link. It's the
+same setup for every agent. See https://www.framer.com/agents/external/. If you're
+only cloning and hosting, skip it.
 
-```
-edit in Framer  →  publish  →  re-clone  →  verify  →  redeploy
-```
+## What carries over, and what doesn't
 
-**One-time setup for editing only:** connect your agent to Framer with
-`npx @framer/agent@latest setup` (needs Node 24+) and copy your project link.
-This is a *single universal setup* — the same for Claude Code, Codex, Cursor, and
-Antigravity (the CLI auto-detects your tool). See
-<https://www.framer.com/agents/external/>. If you only want to clone + host your
-site, you can skip this entirely.
+A clone is a snapshot. Framer stays the source of truth.
 
----
+Carries over: all the layout, styling, fonts, images, and animations; every route
+plus a real 404; hover/scroll effects and other client-side stuff; SEO and Open
+Graph tags; custom code components (they compile into the bundle).
 
-## What carries over — and what doesn't
+Doesn't, without a bit of work:
 
-Your clone is a **static snapshot**. Framer stays the source of truth.
+- Forms. Framer forms post to Framer's backend. Repoint them at Formspree, your
+  own API, or a serverless function.
+- CMS content is frozen at export time. Re-import to refresh it.
+- Framer analytics and A/B tests get stripped. Add your own.
+- Password-gated pages and anything that hits Framer's runtime APIs won't come
+  across.
 
-| ✅ Works perfectly | ⚠️ Needs attention |
-| :-- | :-- |
-| All layout, styling, fonts, images, animations | **Forms** — Framer forms POST to Framer's backend; repoint to Formspree / your API / a serverless function |
-| Every route + a real custom 404 | **CMS live updates** — content is frozen at export; re-import to refresh |
-| Client interactions, hover/scroll effects | **Framer Analytics / A-B tests** — stripped; add your own (Vercel/Plausible) |
-| SEO meta + Open Graph tags | **Password-gated pages** — not exportable |
-| Custom code components (compiled into the bundle) | **Anything hitting Framer's runtime APIs** |
+The agent flags whatever ships imperfect (leftover template pages, dead forms) so
+you're not surprised later.
 
-The agent will call out whatever ships imperfect (template-filler pages, forms)
-so nothing surprises you later.
+## Manual usage
 
----
-
-## Power-user / manual usage
-
-Everything the agent does, you can run yourself. The scripts are plain Node/bash,
-take a `SITE_URL` and paths, and self-locate the bundled engine.
+Everything the agent does is just these scripts. They take a `SITE_URL` and paths
+and find the bundled engine themselves.
 
 ```bash
 P=/path/to/framer-import/skills/framer-import/scripts
 
-# clone: exports every route, localizes assets, stitches routing, builds 404, writes vercel.json
+# clone every route, localize assets, set up routing + 404 + vercel.json
 SITE_URL=https://my-site.framer.app node "$P/clone-framer.mjs" ./my-site
 
-# preview locally (mimics Vercel cleanUrls + 404 fallback)
+# serve locally the way Vercel would (cleanUrls + 404 fallback)
 node "$P/serve.mjs" ./my-site 4000
 
-# verify: headless-renders every route, asserts distinct content + zero failed requests
+# render every route headless and check it's the right page with no broken assets
 node "$P/verify.mjs" http://localhost:4000 ./my-site
 
-# deploy: installs Vercel CLI if missing, handles login, ships to prod
+# deploy (installs the Vercel CLI if missing, handles login)
 bash "$P/deploy.sh" ./my-site
 ```
 
-Env knobs: `SITE_URL` (required), `OUT_DIR`, `ROUTES` (force-include extra
-routes), `FEXPORT` (point at a different FramerExport checkout).
+Extra env vars: `OUT_DIR`, `ROUTES` (force extra routes to include), `FEXPORT`
+(point at a different FramerExport checkout).
 
----
+## How it works
 
-## How it works under the hood
+The generic export tools fall short in a few ways; this works around each:
 
-The generic export tools fall short in three ways; the engine fixes each:
+- They do one page per run. This reads the homepage links, finds every internal
+  route, and exports each one on its own so all the assets end up local.
+- Routing breaks (`/pricing` serves the homepage). Each page gets stitched into a
+  proper routed tree with a `<base href="/">` so even nested routes like
+  `/legal/privacy` resolve.
+- No 404, and editor/badge/tracking left in. It builds a real localized 404,
+  strips that stuff, and writes a `vercel.json` with cleanUrls and rewrites.
 
-1. **One page per run** → it discovers every internal route from the homepage and
-   exports each one individually, so every page's assets are fully localized.
-2. **Broken routing** (`/pricing` serves the homepage) → each page is stitched
-   into a real routed tree with an injected `<base href="/">`, so even nested
-   routes like `/legal/privacy` resolve correctly.
-3. **No 404 / CDN leftovers** → it builds a localized custom 404 and strips
-   editor/badge/tracking, then writes a `vercel.json` (cleanUrls + rewrites).
-
-It **verifies by actually rendering** each route in a headless browser (a plain
-`200` can be a homepage fallback), which is the real ship gate.
-
----
+It checks the result by actually rendering each route in a headless browser rather
+than trusting an HTTP 200 (a 200 can just be the homepage fallback). That render
+check is the gate before it deploys anything.
 
 ## Troubleshooting
 
-| Symptom | Fix |
-| :-- | :-- |
-| "site not published" / empty capture | Publish in Framer first; the engine captures the live URL only. |
-| Cloudflare / captcha error | The site is bot-protected and can't be auto-captured — it fails loudly rather than shipping an empty site. |
-| Deploy says "not logged in" | Run `vercel login` (or `! vercel login` in-agent), then deploy again. |
-| A route shows the homepage | Routing/asset issue — re-run the clone; `verify.mjs` catches this before deploy. |
-| Engine "no node_modules" | Run `bash hooks/ensure-deps.sh`. |
+- "Site not published" or an empty capture: publish in Framer first. It can only
+  see the live URL.
+- Cloudflare or a captcha: the site is bot-protected and can't be captured. It
+  fails loudly instead of shipping an empty site.
+- Deploy says you're not logged in: run `vercel login` and deploy again.
+- A route shows the homepage: routing/asset problem. Re-run the clone; `verify.mjs`
+  catches this before you deploy.
+- Engine says no `node_modules`: run `bash hooks/ensure-deps.sh`.
 
----
-
-## Project structure
+## Layout
 
 ```
 framer-import/
-├── plugin.json                      # Antigravity manifest (root marker)
-├── plugin.yaml + __init__.py        # Hermes plugin (register skills + /framer-import command)
-├── openclaw.plugin.json + index.js + package.json  # OpenClaw native plugin (framer_clone/framer_deploy tools)
-├── .claude-plugin/plugin.json       # Claude Code manifest
-├── .codex-plugin/plugin.json        # Codex manifest (+ interface metadata)
-├── .cursor-plugin/plugin.json       # Cursor manifest
-├── .agents/plugins/marketplace.json # Codex marketplace catalog
+├── plugin.json                      Antigravity manifest
+├── plugin.yaml + __init__.py        Hermes plugin (skills + /framer-import command)
+├── openclaw.plugin.json + index.js + package.json   OpenClaw native plugin (framer_clone/framer_deploy)
+├── .claude-plugin/plugin.json       Claude Code
+├── .codex-plugin/plugin.json        Codex
+├── .cursor-plugin/plugin.json       Cursor
+├── .agents/plugins/marketplace.json Codex marketplace catalog
 ├── hooks/{hooks.json, ensure-deps.sh}
 ├── skills/
-│   ├── framer-import/               # clone → stitch → deploy → re-deploy
+│   ├── framer-import/               clone, deploy, redeploy
 │   │   ├── SKILL.md
 │   │   ├── reference/{gotchas, edit-redeploy-loop}.md
 │   │   └── scripts/{clone-framer.mjs, serve.mjs, verify.mjs, deploy.sh}
-│   └── framer-agent-api/            # edit a Framer project via @framer/agent
+│   └── framer-agent-api/            edit a Framer project via @framer/agent
 │       ├── SKILL.md
 │       └── reference/{dsl, gotchas, recipes}.md
-├── vendor/FramerExport/             # the capture engine (MIT; deps installed at runtime)
-└── LICENSE · CHANGELOG.md · .gitignore
+├── vendor/FramerExport/             the capture engine (MIT; deps installed at runtime)
+└── LICENSE, CHANGELOG.md, .gitignore
 ```
 
-All six harnesses read the same `skills/<name>/SKILL.md`; the scripts self-locate
-the engine, so the exact same code runs everywhere.
+Every agent reads the same `skills/<name>/SKILL.md`, and the scripts locate the
+engine on their own, so the same code runs everywhere.
 
----
+## Credits
 
-## Attribution
-
-Bundles [FramerExport](https://github.com/danbenba/FramerExport) (MIT, © danbenba)
-as the capture engine — see `vendor/FramerExport/LICENSE`.
+Uses [FramerExport](https://github.com/danbenba/FramerExport) (MIT, © danbenba) as
+the capture engine. See `vendor/FramerExport/LICENSE`.
 
 ## License
 
-MIT © 2026 Archit Sakri. See `LICENSE`.
+MIT © 2026 Archit Sakri.
