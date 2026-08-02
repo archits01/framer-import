@@ -160,8 +160,8 @@ Doesn't, without a bit of work:
 - Password-gated pages and anything that hits Framer's runtime APIs won't come
   across.
 
-The agent flags whatever ships imperfect (leftover template pages, dead forms) so
-you're not surprised later.
+The agent tells you upfront if something came over broken, like a leftover
+template page or a dead form, so it's not a surprise later.
 
 ## Manual usage
 
