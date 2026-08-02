@@ -3,8 +3,13 @@
 Clone a published Framer site into a static site you actually own, deploy it, and
 change it later by just telling your agent what to do.
 
-It runs as a plugin (or skill) in Claude Code, Codex, Cursor, Antigravity, Hermes,
-and OpenClaw, and it's on [ClawHub](https://clawhub.ai) as `@archits01/framer-import`.
+<p align="center">
+  <img src="docs/demo.gif" alt="Clone a Framer site and deploy it, from a single prompt" width="760">
+</p>
+
+Runs inside an AI coding agent — Claude Code, Codex, Cursor, Antigravity, Hermes,
+or OpenClaw. You'll need one of those. It's also on
+[ClawHub](https://clawhub.ai) as `@archits01/framer-import`.
 
 ## What it does
 
@@ -86,6 +91,13 @@ Gives you a `/framer-import` command (`clone <url>`, `deploy [dir]`, `help`).
 ```bash
 openclaw plugins install clawhub:@archits01/framer-import
 ```
+On ClawHub you may see a "suspicious" review flag — that's the scanner noting a
+tool that installs a browser and deploys to production, not a problem with the
+code. It's still installable. See [SECURITY.md](SECURITY.md) for what runs when.
+
+Once it's installed, just tell your agent what you want:
+
+> import https://your-site.framer.app and deploy it
 
 The first clone installs the engine's dependencies (a headless browser). Nothing
 installs before that; you can pre-install with `bash hooks/ensure-deps.sh`.
@@ -221,8 +233,8 @@ engine on their own, so the same code runs everywhere.
 ## Credits
 
 Uses [FramerExport](https://github.com/danbenba/FramerExport) (MIT, © danbenba) as
-the capture engine. See `vendor/FramerExport/LICENSE`.
+the capture engine. Third-party credits are in [NOTICE](NOTICE).
 
 ## License
 
-MIT © 2026 Archit Sakri.
+MIT © 2026 Archit Sakri. See [LICENSE](LICENSE).

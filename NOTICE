@@ -1,0 +1,10 @@
+Framer Import
+Copyright (c) 2026 Archit Sakri
+Licensed under the MIT License (see LICENSE).
+
+This project bundles the following third-party software:
+
+- FramerExport (the site-capture engine), under vendor/FramerExport/
+  MIT License, Copyright (c) Dany (danbenba)
+  https://github.com/danbenba/FramerExport
+  Its license is retained at vendor/FramerExport/LICENSE.
