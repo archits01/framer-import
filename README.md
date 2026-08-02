@@ -1,24 +1,26 @@
-# Framer Import
-
-Clone a published Framer site into a static site you actually own, deploy it, and
-change it later by just telling your agent what to do.
+<h1 align="center">Framer Import</h1>
 
 <p align="center">
-  <img src="docs/demo-poster.png" alt="Framer Import demo" width="760">
+  Clone any published Framer site into code you own,<br>
+  deploy it, and change it later just by talking to your agent.
 </p>
 
-<!-- DEMO (mp4) — two easy ways to show it:
-  1. Inline player (best): edit this README on github.com and drag your demo.mp4
-     right here. GitHub uploads it and inserts a <video> that plays inline. Then
-     you can delete this poster <img> above.
-  2. Clickable poster: link the poster to your video (X post or hosted mp4):
-       [![Framer Import demo](docs/demo-poster.png)](https://your-video-url)
-     (replace the plain <img> above with that line).
--->
+<p align="center">
+  <a href="https://github.com/archits01/framer-import/releases"><img alt="Release" src="https://img.shields.io/github/v/release/archits01/framer-import?style=flat-square&color=0b7285"></a>
+  <a href="LICENSE"><img alt="License" src="https://img.shields.io/github/license/archits01/framer-import?style=flat-square&color=0b7285"></a>
+  <img alt="Works in 6 agents" src="https://img.shields.io/badge/works%20in-6%20agents-0b7285?style=flat-square">
+  <a href="https://clawhub.ai"><img alt="ClawHub" src="https://img.shields.io/badge/ClawHub-%40archits01%2Fframer--import-0b7285?style=flat-square"></a>
+</p>
 
-Runs inside an AI coding agent — Claude Code, Codex, Cursor, Antigravity, Hermes,
-or OpenClaw. You'll need one of those. It's also on
-[ClawHub](https://clawhub.ai) as `@archits01/framer-import`.
+<p align="center">
+  <img src="docs/demo.gif" alt="Clone a Framer site and deploy it from a single prompt" width="760">
+  <br>
+  <sub><a href="https://github.com/archits01/framer-import/releases/download/v0.5.3/framer-import-demo.mp4">▶ full 2-minute walkthrough, with sound</a></sub>
+</p>
+
+<p align="center">
+  <sub>Runs in <b>Claude&nbsp;Code</b> · <b>Codex</b> · <b>Cursor</b> · <b>Antigravity</b> · <b>Hermes</b> · <b>OpenClaw</b> — one plugin. You'll need one of them installed.</sub>
+</p>
 
 ## What it does
 
