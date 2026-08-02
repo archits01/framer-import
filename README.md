@@ -16,9 +16,9 @@ whole loop, driven from plain language.
 ```
 
 Works as a plugin in **Claude Code · Codex · Cursor · Antigravity · Hermes ·
-OpenClaw** — all six live-verified. One folder, one shared engine. The
-`framer-agent-api` skill and the `@archits01/framer-import` plugin are also
-**published on [ClawHub](https://clawhub.ai)**. Then just talk to your agent.
+OpenClaw** — all six live-verified. One folder, one shared engine, and
+**published on [ClawHub](https://clawhub.ai)** as `@archits01/framer-import`
+(bundles both skills). Then just talk to your agent.
 
 ---
 
@@ -143,8 +143,7 @@ Verified: loads in-process, both tools register. The `framer_clone` tool runs
 
 ### ClawHub
 ```bash
-clawhub skill install framer-agent-api          # the editing skill (text)
-clawhub package install @archits01/framer-import # the clone/deploy plugin
+clawhub package install @archits01/framer-import   # the full plugin (bundles both skills)
 ```
 
 > **First run installs the engine's dependencies** (a headless-browser download)

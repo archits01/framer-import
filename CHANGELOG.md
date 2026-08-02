@@ -9,8 +9,9 @@
   with the OpenClaw CLI (`openclaw plugins install` → `inspect --runtime`:
   Status loaded, both tools registered). Doesn't affect the other five (Claude
   validate + Antigravity validate still pass).
-- **Published on ClawHub:** `framer-agent-api@1.0.0` (skill) and
-  `@archits01/framer-import@0.5.0` (code-plugin).
+- **Published on ClawHub:** `@archits01/framer-import@0.5.0` (code-plugin, bundles
+  both skills). A standalone `framer-agent-api` skill was published then removed —
+  redundant, since the plugin already ships it.
 - **Added Hermes (fifth target, VERIFIED).** Added a root `plugin.yaml` +
   `__init__.py` — Hermes uses a Python `register(ctx)` plugin model but the *same*
   `SKILL.md` skill format, so both skills register unchanged via
