@@ -38,7 +38,7 @@ yourself, it's three steps (see [manual usage](#manual-usage)):
 ```bash
 SITE_URL=https://my-site.framer.app node .../scripts/clone-framer.mjs ./my-site
 node .../scripts/verify.mjs http://localhost:4000 ./my-site   # after serving it
-bash .../scripts/deploy.sh ./my-site
+bash .../scripts/deploy.sh ./my-site --yes   # --yes is required to publish
 ```
 
 ## Install
@@ -87,8 +87,13 @@ Gives you a `/framer-import` command (`clone <url>`, `deploy [dir]`, `help`).
 openclaw plugins install clawhub:@archits01/framer-import
 ```
 
-First run downloads the engine's dependencies (it uses a headless browser). That
-happens automatically, or you can trigger it with `bash hooks/ensure-deps.sh`.
+The first clone downloads the engine's dependencies (it uses a headless browser).
+That happens lazily, on the first clone only — nothing installs at startup. You
+can also trigger it yourself with `bash hooks/ensure-deps.sh`.
+
+Deploys need explicit confirmation: `deploy.sh` won't publish without `--yes`, and
+the OpenClaw `framer_deploy` tool won't unless `confirm: true`. See
+[SECURITY.md](SECURITY.md).
 
 ## What you need
 
@@ -198,7 +203,7 @@ framer-import/
 ├── .codex-plugin/plugin.json        Codex
 ├── .cursor-plugin/plugin.json       Cursor
 ├── .agents/plugins/marketplace.json Codex marketplace catalog
-├── hooks/{hooks.json, ensure-deps.sh}
+├── hooks/ensure-deps.sh            (installs the engine on first clone; no auto-run)
 ├── skills/
 │   ├── framer-import/               clone, deploy, redeploy
 │   │   ├── SKILL.md

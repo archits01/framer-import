@@ -27,6 +27,9 @@ export default defineToolPlugin({
   name: "Framer Import",
   description:
     "Clone any published Framer site into a self-contained, routed static site you own, then deploy it to Vercel or any static host.",
+  // Activate on tool use, not at gateway startup — no work happens until you
+  // actually call framer_clone / framer_deploy.
+  activation: { onStartup: false },
   tools: (tool) => [
     tool({
       name: "framer_clone",
@@ -49,7 +52,7 @@ export default defineToolPlugin({
       },
       execute: async ({ url, outDir }) => {
         const out = outDir || "./framer-site";
-        run("bash", [path.join(ROOT, "hooks", "ensure-deps.sh")]); // ensure engine deps
+        // clone-framer.mjs installs the engine on first use — nothing runs before this.
         const log = run("node", [path.join(SCRIPTS, "clone-framer.mjs"), out], { SITE_URL: url });
         return { outDir: out, log: log.slice(-6000) };
       },
@@ -57,7 +60,7 @@ export default defineToolPlugin({
     tool({
       name: "framer_deploy",
       description:
-        "Deploy a cloned static site directory to Vercel (installs the Vercel CLI if missing; reports the live URL).",
+        "Deploy a cloned static site directory to Vercel PRODUCTION (public). This publishes live using the local Vercel login, so only call it after the user has explicitly approved going live: set confirm=true only then. Without confirm=true it returns the consent prompt instead of deploying.",
       parameters: {
         type: "object",
         additionalProperties: false,
@@ -66,12 +69,19 @@ export default defineToolPlugin({
             type: "string",
             description: "Site directory produced by framer_clone (default: ./framer-site)",
           },
+          confirm: {
+            type: "boolean",
+            description:
+              "Must be true to actually publish. Set true ONLY after the user has explicitly approved a public production deploy. Default false = returns the consent prompt without deploying.",
+          },
         },
       },
-      execute: async ({ dir }) => {
+      execute: async ({ dir, confirm }) => {
         const site = dir || "./framer-site";
-        const log = run("bash", [path.join(SCRIPTS, "deploy.sh"), site]);
-        return { dir: site, log: log.slice(-6000) };
+        const args = [path.join(SCRIPTS, "deploy.sh"), site];
+        if (confirm === true) args.push("--yes");
+        const log = run("bash", args);
+        return { dir: site, confirmed: confirm === true, log: log.slice(-6000) };
       },
     }),
   ],

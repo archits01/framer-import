@@ -68,9 +68,9 @@ site they own or a template they've published/licensed.
 1. **The FramerExport engine is BUNDLED** at the plugin root `vendor/FramerExport/`
    (captures Framer sites — MIT-licensed, vendored so the plugin is self-contained
    and doesn't depend on the upstream repo staying up). Its deps + a puppeteer
-   Chromium install automatically via the plugin's **`SessionStart` hook**
-   (`hooks/ensure-deps.sh`) — into `${CLAUDE_PLUGIN_DATA}` for marketplace
-   installs, or in place for a local skills-dir install. To force it manually:
+   Chromium install **lazily, on the first clone only** — `clone-framer.mjs` runs
+   `hooks/ensure-deps.sh` when it finds no engine. Nothing installs at startup or
+   session time. To pre-install manually:
    ```bash
    bash "${CLAUDE_PLUGIN_ROOT}/hooks/ensure-deps.sh"
    ```
@@ -115,9 +115,13 @@ Use the helper — it makes deploy work even for someone who has **never used
 Vercel**: it installs the CLI if it's missing, checks login state, and ships:
 
 ```bash
-bash "${CLAUDE_PLUGIN_ROOT}/skills/framer-import/scripts/deploy.sh" ./my-site
+# --yes is REQUIRED to publish. Only pass it AFTER the user approves going live.
+bash "${CLAUDE_PLUGIN_ROOT}/skills/framer-import/scripts/deploy.sh" ./my-site --yes
 ```
 
+- **Exit 3 = needs confirmation.** Without `--yes` the script refuses to publish
+  and prints the consent prompt. This is intentional — never bypass it; get the
+  user's ok, then re-run with `--yes`.
 - **Exit 2 = needs login.** The script prints the instruction; relay it: have
   them run `! vercel login` in the chat (the `!` prefix runs it in their session,
   browser-based), then deploy again.

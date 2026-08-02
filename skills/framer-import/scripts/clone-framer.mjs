@@ -44,11 +44,22 @@ const candidates = [
   process.env.CLAUDE_PLUGIN_DATA && path.join(process.env.CLAUDE_PLUGIN_DATA, 'FramerExport'),
   path.join(PLUGIN_ROOT, 'vendor', 'FramerExport'),
 ].filter(Boolean);
-const FEXPORT = candidates.find((d) => fs.existsSync(path.join(d, 'node_modules')));
+const hasDeps = (d) => fs.existsSync(path.join(d, 'node_modules'));
+let FEXPORT = candidates.find(hasDeps);
+// Lazy, on-demand dependency install: nothing is installed until you actually
+// run a clone. (No startup/session hook does this behind your back.)
+if (!FEXPORT) {
+  const setup = path.join(PLUGIN_ROOT, 'hooks', 'ensure-deps.sh');
+  if (fs.existsSync(setup)) {
+    console.error('[framer-import] first run: installing the exporter engine (one-time)…');
+    spawnSync('bash', [setup], { stdio: 'inherit' });
+    FEXPORT = candidates.find(hasDeps);
+  }
+}
 if (!FEXPORT) {
   console.error(
     `ERROR: FramerExport engine has no node_modules. Tried:\n  ${candidates.join('\n  ')}\n` +
-      `Run the plugin's setup:  bash "${path.join(PLUGIN_ROOT, 'hooks', 'ensure-deps.sh')}"`
+      `Run the setup manually:  bash "${path.join(PLUGIN_ROOT, 'hooks', 'ensure-deps.sh')}"`
   );
   process.exit(1);
 }

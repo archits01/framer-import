@@ -1,7 +1,7 @@
 {
   "name": "framer-import",
   "description": "Clone any published Framer site into a self-contained, routed static site, edit it by prompt, and deploy to Vercel or any static host — then re-import and re-deploy on every change.",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "author": {
     "name": "Archit Sakri"
   },

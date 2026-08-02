@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.5.1
+
+Security hardening (addresses ClawHub scan findings on the OpenClaw package):
+
+- **Deploys now require explicit consent.** `deploy.sh` refuses to publish without
+  `--yes` (or `FRAMER_DEPLOY_CONFIRM=1`); the OpenClaw `framer_deploy` tool has a
+  `confirm` param that defaults to false. Consent is enforced by the tool/script,
+  not just documented.
+- **No startup side effects.** Removed the auto-running `SessionStart` hook; the
+  engine's dependencies now install lazily on the first clone (`clone-framer.mjs`
+  calls `ensure-deps.sh` itself). OpenClaw plugin now `activation.onStartup: false`.
+- Added `SECURITY.md` documenting the consent model, lazy install, the mirror's
+  CSP-stripping caveat, and own-sites-only use.
+
 ## 0.5.0
 
 - **OpenClaw — native plugin, VERIFIED + published on ClawHub.** Added a native
