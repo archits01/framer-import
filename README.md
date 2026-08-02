@@ -87,12 +87,11 @@ Gives you a `/framer-import` command (`clone <url>`, `deploy [dir]`, `help`).
 openclaw plugins install clawhub:@archits01/framer-import
 ```
 
-The first clone downloads the engine's dependencies (it uses a headless browser).
-That happens lazily, on the first clone only — nothing installs at startup. You
-can also trigger it yourself with `bash hooks/ensure-deps.sh`.
+The first clone installs the engine's dependencies (a headless browser). Nothing
+installs before that; you can pre-install with `bash hooks/ensure-deps.sh`.
 
-Deploys need explicit confirmation: `deploy.sh` won't publish without `--yes`, and
-the OpenClaw `framer_deploy` tool won't unless `confirm: true`. See
+Deploying needs an explicit ok: `deploy.sh` won't publish without `--yes`, and the
+OpenClaw `framer_deploy` tool won't unless you set `confirm: true`. More in
 [SECURITY.md](SECURITY.md).
 
 ## What you need
@@ -158,8 +157,8 @@ node "$P/serve.mjs" ./my-site 4000
 # render every route headless and check it's the right page with no broken assets
 node "$P/verify.mjs" http://localhost:4000 ./my-site
 
-# deploy (installs the Vercel CLI if missing, handles login)
-bash "$P/deploy.sh" ./my-site
+# deploy (installs the Vercel CLI if missing, handles login). --yes to actually publish.
+bash "$P/deploy.sh" ./my-site --yes
 ```
 
 Extra env vars: `OUT_DIR`, `ROUTES` (force extra routes to include), `FEXPORT`
@@ -167,7 +166,7 @@ Extra env vars: `OUT_DIR`, `ROUTES` (force extra routes to include), `FEXPORT`
 
 ## How it works
 
-The generic export tools fall short in a few ways; this works around each:
+The generic export tools fall short in a few ways. This works around each:
 
 - They do one page per run. This reads the homepage links, finds every internal
   route, and exports each one on its own so all the assets end up local.
