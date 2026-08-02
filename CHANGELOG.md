@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.5.0
+
+- **Added Hermes (fifth target, VERIFIED).** Added a root `plugin.yaml` +
+  `__init__.py` — Hermes uses a Python `register(ctx)` plugin model but the *same*
+  `SKILL.md` skill format, so both skills register unchanged via
+  `ctx.register_skill`, plus a `/framer-import` slash command
+  (`clone <url>` / `deploy [dir]` / `help`) that runs the shared scripts and
+  lazily installs the engine deps. Discovered + enabled by the Hermes CLI
+  (`hermes plugins`); the root `plugin.yaml`/`__init__.py` don't affect the other
+  four (Claude Code validate, Codex list, Antigravity validate all still pass).
+
 ## 0.4.0
 
 - **Added Cursor (VERIFIED).** Added `.cursor-plugin/plugin.json`. All harnesses

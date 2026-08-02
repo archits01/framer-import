@@ -15,8 +15,9 @@ whole loop, driven from plain language.
          └───────────────────  "change X"  ◀────────────────────┘
 ```
 
-Works as a plugin in **Claude Code · Codex · Cursor · Antigravity** — all four
-verified. One install, then just talk to your agent.
+Works as a plugin in **Claude Code · Codex · Cursor · Antigravity · Hermes** —
+all five verified. One folder, five manifests, one shared engine. Then just talk
+to your agent.
 
 ---
 
@@ -117,6 +118,15 @@ ln -sfn /path/to/framer-import ~/.cursor/plugins/local/framer-import
 agy plugin install /path/to/framer-import
 agy plugin list           # shows: framer-import (skills)
 ```
+
+### Hermes
+Install from GitHub, then enable (plugins are opt-in):
+```bash
+hermes plugins install archits01/framer-import --enable
+hermes plugins list       # shows: framer-import  enabled
+```
+Adds a `/framer-import` slash command (`clone <url>` / `deploy [dir]` / `help`)
+and registers both skills (load with `skill_view("framer-import:framer-import")`).
 
 > **First run installs the engine's dependencies** (a headless-browser download)
 > automatically via the plugin's `SessionStart` hook. To trigger it manually:
@@ -237,6 +247,7 @@ It **verifies by actually rendering** each route in a headless browser (a plain
 ```
 framer-import/
 ├── plugin.json                      # Antigravity manifest (root marker)
+├── plugin.yaml + __init__.py        # Hermes plugin (register skills + /framer-import command)
 ├── .claude-plugin/plugin.json       # Claude Code manifest
 ├── .codex-plugin/plugin.json        # Codex manifest (+ interface metadata)
 ├── .cursor-plugin/plugin.json       # Cursor manifest
@@ -254,7 +265,7 @@ framer-import/
 └── LICENSE · CHANGELOG.md · .gitignore
 ```
 
-All four harnesses read the same `skills/<name>/SKILL.md`; the scripts self-locate
+All five harnesses read the same `skills/<name>/SKILL.md`; the scripts self-locate
 the engine, so the exact same code runs everywhere.
 
 ---

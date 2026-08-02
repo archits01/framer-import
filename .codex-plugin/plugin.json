@@ -1,6 +1,6 @@
 {
   "name": "framer-import",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Clone any published Framer site into a self-contained, routed static site, edit it by prompt, and deploy to Vercel or any static host — then re-import and re-deploy on every change.",
   "author": {
     "name": "Archit Sakri"
@@ -24,7 +24,10 @@
     "longDescription": "Import (clone) any published Framer site into a self-contained, routed static site you own, deploy it to Vercel or any static host, then change it in plain language and ship again. Bundles the FramerExport engine and works around its single-page / CDN-linked limitations (per-route export, <base> stitching, localized 404, vercel.json). Pairs with the framer-agent-api skill for the prompt-driven editing half of the loop.",
     "developerName": "Archit Sakri",
     "category": "Productivity",
-    "capabilities": ["Read", "Write"],
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
     "defaultPrompt": [
       "Import https://your-site.framer.app and deploy it.",
       "Clone my Framer site into code I own and put it on Vercel.",
