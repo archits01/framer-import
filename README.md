@@ -82,18 +82,24 @@ No jargon, no terminal walls — just a preview, a link, and honest next steps.
 Pick your agent. Each is verified working; the skills and engine are identical
 across all four.
 
-### Claude Code
-Drop the folder into `~/.claude/skills/` — it auto-loads as a skills-directory
-plugin, no install step.
+First, clone it somewhere:
 ```bash
-git clone <repo> ~/.claude/skills/framer-import
+git clone https://github.com/archits01/framer-import.git
+```
+
+### Claude Code
+Drop it into `~/.claude/skills/` — it auto-loads as a skills-directory plugin,
+no install step.
+```bash
+git clone https://github.com/archits01/framer-import.git ~/.claude/skills/framer-import
 # restart Claude Code (or /reload-plugins), then:
 claude plugin list        # shows: framer-import@skills-dir  ✔ loaded
 ```
 
 ### Codex
+Install straight from GitHub:
 ```bash
-codex plugin marketplace add /path/to/framer-import   # or:  owner/repo  (git)
+codex plugin marketplace add archits01/framer-import
 codex plugin add framer-import@framer-import-marketplace
 codex plugin list         # shows: installed, enabled
 ```
