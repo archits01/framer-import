@@ -1,0 +1,25 @@
+node_modules/
+dist/
+framer-output/
+*.log
+.DS_Store
+.claude/
+*.tgz
+*.env
+coverage/
+*.map
+tmp/
+
+# generated site exports (never commit)
+/cooksite-export/
+/framer-*/
+/webflow-*/
+/wix-*/
+/shopify-*/
+/notion-*/
+/squarespace-*/
+/ghost-*/
+/ooo/
+/tatatwda/
+/dev.exe/
+/framer-export.js

@@ -1,0 +1,13 @@
+# Engine deps are installed at runtime (SessionStart hook -> CLAUDE_PLUGIN_DATA),
+# never committed. Keeps the published plugin small and marketplace-clean.
+vendor/FramerExport/node_modules/
+vendor/FramerExport/dist/
+
+# Runtime data / plugin data dir
+.data/
+
+# Clone outputs (per-run, not part of the plugin)
+_ex/
+framer-site/
+*-site/
+_ex_master.log

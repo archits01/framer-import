@@ -1,0 +1,309 @@
+import fs from 'fs/promises';
+import path from 'path';
+import { log, warn, success } from '../logger/index.js';
+import { prettifyJS } from '../formatter/prettify.js';
+import { SERVE_SCRIPT } from '../server/template.js';
+import type { ExporterContext } from '../types.js';
+
+function escapeRegex(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function stripBySelector(html: string, sel: string): string {
+  if (sel.includes('[src*="')) {
+    const match = sel.match(/\[src\*="([^"]+)"\]/);
+    if (match) {
+      const domain: string = escapeRegex(match[1]);
+      html = html.replace(new RegExp(`<script[^>]*${domain}[^>]*>[^<]*<\\/script>`, 'g'), '');
+      html = html.replace(new RegExp(`<script[^>]*${domain}[^>]*><\\/script>`, 'g'), '');
+    }
+  } else if (sel.includes('[href*="')) {
+    const match = sel.match(/\[href\*="([^"]+)"\]/);
+    if (match) {
+      const href: string = escapeRegex(match[1]);
+      html = html.replace(new RegExp(`<link[^>]*${href}[^>]*>`, 'g'), '');
+    }
+  } else if (sel.startsWith('.')) {
+    const cls: string = escapeRegex(sel.slice(1));
+    html = html.replace(
+      new RegExp(`<[^>]*class="[^"]*${cls}[^"]*"[^>]*>[\\s\\S]*?<\\/[^>]*>`, 'g'),
+      ''
+    );
+  } else if (sel.startsWith('#')) {
+    const id: string = sel.slice(1);
+    html = removeElementById(html, id);
+  }
+  return html;
+}
+
+function removeElementById(html: string, id: string): string {
+  const marker: string = `id="${id}"`;
+  let idx: number = html.indexOf(marker);
+  while (idx !== -1) {
+    const tagStart: number = html.lastIndexOf('<', idx);
+    if (tagStart === -1) break;
+
+    const tagNameEnd: number = html.indexOf(' ', tagStart + 1);
+    const tagName: string = html.slice(tagStart + 1, tagNameEnd).toLowerCase();
+
+    let depth = 0;
+    let i: number = tagStart;
+    while (i < html.length) {
+      if (
+        html.startsWith(`<${tagName}`, i) &&
+        (html[i + tagName.length + 1] === ' ' || html[i + tagName.length + 1] === '>')
+      ) {
+        depth++;
+        i += tagName.length + 1;
+      } else if (html.startsWith(`</${tagName}>`, i)) {
+        depth--;
+        if (depth === 0) {
+          html = html.slice(0, tagStart) + html.slice(i + tagName.length + 3);
+          break;
+        }
+        i += tagName.length + 3;
+      } else {
+        i++;
+      }
+    }
+
+    idx = html.indexOf(marker);
+  }
+  return html;
+}
+
+function processSEO(html: string, url: string): string {
+  const canonical = url.split('?')[0].replace(/\/$/, '');
+
+  // Inject Canonical
+  if (!html.includes('rel="canonical"')) {
+    html = html.replace('</head>', `  <link rel="canonical" href="${canonical}">\n  </head>`);
+  }
+
+  // Inject Meta Description if missing
+  if (!html.includes('name="description"')) {
+    html = html.replace(
+      '</head>',
+      `  <meta name="description" content="Exported with Framer Export - Fast, SEO-optimized, and clean.">\n  </head>`
+    );
+  }
+
+  // Inject OG Tags if missing
+  if (!html.includes('property="og:')) {
+    html = html.replace(
+      '</head>',
+      `  <meta property="og:type" content="website">\n  <meta property="og:url" content="${canonical}">\n  <meta property="og:title" content="Exported Site">\n  <meta property="og:description" content="A fast, clean version of this site, exported for performance.">\n  </head>`
+    );
+  }
+
+  // Inject Robot tags
+  if (!html.includes('name="robots"')) {
+    html = html.replace('</head>', `  <meta name="robots" content="index, follow">\n  </head>`);
+  }
+
+  return html;
+}
+
+function stripIntegrityAndCors(html: string): string {
+  html = html.replace(/\s+integrity="[^"]*"/g, '');
+  html = html.replace(/\s+crossorigin="[^"]*"/g, '');
+  html = html.replace(/\s+crossorigin/g, '');
+  html = html.replace(/<link[^>]*rel="preconnect"[^>]*>/g, '');
+  html = html.replace(/<link[^>]*rel="dns-prefetch"[^>]*>/g, '');
+  html = html.replace(/<meta[^>]*content-security-policy[^>]*>/gi, '');
+  return html;
+}
+
+function stripSrcsetCdnUrls(html: string): string {
+  html = html.replace(/srcset="([^"]*)"/g, (_match: string, srcset: string) => {
+    const cleaned: string = srcset
+      .split(',')
+      .map((entry: string) => entry.trim())
+      .filter((entry: string) => !entry.startsWith('http'))
+      .join(', ');
+    return cleaned ? 'srcset="' + cleaned + '"' : '';
+  });
+  return html;
+}
+
+export async function buildOutput(exporter: ExporterContext): Promise<void> {
+  exporter.cooking?.update('Stripping platform badges...');
+  log('Starting HTML post-processing...');
+  log('HTML size: ' + (exporter.ssrHTML.length / 1024).toFixed(1) + ' KB');
+
+  let html: string = exporter.ssrHTML;
+  if (!html) {
+    warn('No SSR HTML available, cannot build output');
+    return;
+  }
+
+  exporter.cooking?.update('Removing integrity checks...');
+  const beforeIntegrity: number = html.length;
+  html = stripIntegrityAndCors(html);
+  log('Stripped integrity/crossorigin/preconnect (' + (beforeIntegrity - html.length) + ' chars)');
+  success('Integrity and CORS restrictions removed');
+
+  if (typeof processSEO === 'function') {
+    exporter.cooking?.update('Optimizing SEO...');
+    html = processSEO(html, exporter.siteUrl);
+    success('SEO meta tags optimized');
+  }
+
+  log('Stripping ' + exporter.platform.stripSelectors.length + ' selectors:');
+  for (const sel of exporter.platform.stripSelectors) {
+    const before: number = html.length;
+    html = stripBySelector(html, sel);
+    const removed: number = before - html.length;
+    if (removed > 0) {
+      log('  Stripped ' + sel + ' (' + removed + ' chars removed)');
+    }
+  }
+
+  log('Applying ' + exporter.platform.stripPatterns.length + ' regex patterns...');
+  for (const pattern of exporter.platform.stripPatterns) {
+    const before: number = html.length;
+    html = html.replace(new RegExp(pattern.source, pattern.flags), '');
+    const removed: number = before - html.length;
+    if (removed > 0) {
+      log('  Pattern removed ' + removed + ' chars');
+    }
+  }
+  if (exporter.platform.stripScripts && exporter.platform.stripScripts.length > 0) {
+    log('Applying ' + exporter.platform.stripScripts.length + ' script-strip patterns...');
+    for (const pattern of exporter.platform.stripScripts) {
+      const before: number = html.length;
+      html = html.replace(new RegExp(pattern.source, pattern.flags), '');
+      const removed: number = before - html.length;
+      if (removed > 0) log('  Script pattern removed ' + removed + ' chars');
+    }
+  }
+
+  success('Platform badges and tracking stripped');
+
+  if (exporter.platform.postCapture) {
+    try {
+      const before: number = html.length;
+      html = exporter.platform.postCapture(html, exporter);
+      log('postCapture hook applied (delta ' + (html.length - before) + ' chars)');
+    } catch (e) {
+      warn('postCapture hook failed: ' + (e as Error).message);
+    }
+  }
+
+  exporter.cooking?.update('Rewriting asset URLs...');
+  log('Rewriting ' + exporter.assets.entries.size + ' CDN URLs to local paths...');
+  const beforeRewrite: number = html.length;
+  html = exporter.assets.rewrite(html, '');
+  log('HTML rewrite delta: ' + (html.length - beforeRewrite) + ' chars');
+
+  if (exporter.platform.rewriteUrlPatterns && exporter.platform.rewriteUrlPatterns.length > 0) {
+    for (const { from, to } of exporter.platform.rewriteUrlPatterns) {
+      html = html.replace(new RegExp(from.source, from.flags), to);
+    }
+    log('Applied ' + exporter.platform.rewriteUrlPatterns.length + ' custom URL rewrites');
+  }
+
+  exporter.cooking?.update('Cleaning srcset references...');
+  html = stripSrcsetCdnUrls(html);
+  log('Cleaned remaining CDN URLs from srcset attributes');
+
+  await rewriteDownloadedFiles(exporter);
+  success('All URLs rewritten to local paths');
+
+  exporter.cooking?.update('Pretty-printing JS files...');
+  await prettifyDownloadedJS(exporter);
+
+  exporter.cooking?.update('Writing final output...');
+  log('Writing index.html (' + (html.length / 1024).toFixed(1) + ' KB)...');
+  await fs.writeFile(path.join(exporter.outDir, 'index.html'), html);
+  success('index.html written');
+
+  await fs.writeFile(path.join(exporter.outDir, 'serve.js'), SERVE_SCRIPT);
+  log('serve.js written');
+  await fs.writeFile(
+    path.join(exporter.outDir, 'package.json'),
+    JSON.stringify({ type: 'module', scripts: { serve: 'node serve.js' } }, null, 2) + '\n'
+  );
+  log('package.json written for serve.js');
+  success('Output build complete');
+}
+
+async function rewriteDownloadedFiles(exporter: ExporterContext): Promise<void> {
+  const dirs: string[] = ['scripts/vendor', 'scripts/modules', 'styles'];
+  let rewritten = 0;
+
+  for (const dir of dirs) {
+    const fullDir: string = path.join(exporter.outDir, dir);
+    let files: string[];
+    try {
+      files = await fs.readdir(fullDir);
+    } catch {
+      continue;
+    }
+
+    for (const file of files) {
+      const ext: string = path.extname(file).toLowerCase();
+      if (!['.mjs', '.js', '.css'].includes(ext)) continue;
+
+      const filePath: string = path.join(fullDir, file);
+      try {
+        let content: string = await fs.readFile(filePath, 'utf-8');
+        const before: string = content;
+        content = exporter.assets.rewrite(content, dir);
+        if (content !== before) {
+          await fs.writeFile(filePath, content);
+          rewritten++;
+        }
+      } catch {}
+    }
+  }
+  log('Rewrote URLs in ' + rewritten + ' JS/CSS files');
+}
+
+async function prettifyDownloadedJS(exporter: ExporterContext): Promise<void> {
+  const dirs: string[] = ['scripts/vendor', 'scripts/modules'];
+  let count = 0;
+  let total = 0;
+
+  for (const dir of dirs) {
+    const fullDir: string = path.join(exporter.outDir, dir);
+    let files: string[];
+    try {
+      files = await fs.readdir(fullDir);
+    } catch {
+      continue;
+    }
+
+    const jsFiles: string[] = files.filter((f) => {
+      const ext: string = path.extname(f).toLowerCase();
+      return ext === '.mjs' || ext === '.js';
+    });
+    total += jsFiles.length;
+
+    for (const file of jsFiles) {
+      const filePath: string = path.join(fullDir, file);
+      try {
+        const raw: string = await fs.readFile(filePath, 'utf-8');
+
+        const nlRatio: number = (raw.match(/\n/g) || []).length / raw.length;
+        if (nlRatio > 0.05) {
+          count++;
+          continue;
+        }
+
+        const pretty: string = await prettifyJS(raw);
+        await fs.writeFile(filePath, pretty, 'utf-8');
+        count++;
+
+        if (count % 5 === 0) {
+          exporter.cooking?.update('Pretty-printing... (' + count + '/' + total + ')');
+        }
+      } catch (e) {
+        warn('Pretty-print skipped: ' + file + ' - ' + (e as Error).message);
+        count++;
+      }
+    }
+  }
+
+  success('Formatted ' + count + '/' + total + ' JS/MJS files');
+}

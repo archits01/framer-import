@@ -1,0 +1,5 @@
+{
+  "$schema": "https://antigravity.google/schemas/v1/plugin.json",
+  "name": "framer-import",
+  "description": "Clone any published Framer site into a self-contained, routed static site, edit it by prompt, and deploy to Vercel or any static host — then re-import and re-deploy on every change."
+}
